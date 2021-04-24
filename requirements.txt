@@ -1,0 +1,3 @@
+PySide2==5.15.2
+hy==0.20.0
+git+https://github.com/dmitrykouznetsov/dqtwidgets.git
