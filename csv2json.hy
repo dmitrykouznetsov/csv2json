@@ -16,7 +16,7 @@
 (import sys
         csv
         json
-        [dqtwidgets [MainWindowTemplate h-layout v-layout EditableTree EditableList]]
+        [dqtwidgets [MainWindowTemplate h-layout v-layout EditableTree EditableList add-action]]
         [PySide2.QtWidgets [QApplication QPushButton QFileDialog]])
 
 
@@ -36,13 +36,26 @@
     (json.dump data w :indent 4)))
 
 
-(defn gui []
-  (setv input-list (EditableList :actions {"Load CSV" (fn [l] (l.populate (load-csv)))})
-                                           ; "Clear list" (fn [l] (l.clear))})
-        output-tree (EditableTree :actions {"Save to JSON" (fn [tree] (store tree.items))})
-        content (h-layout [input-list output-tree]))
+(defn bind-actions [widget actions]
+  (for [(, entry action) (actions.items)]
+    (add-action widget entry action)))
 
-  (MainWindowTemplate :domain "com.github.dmitrykouznetsov" :appname "csv2json"
+
+(defn gui []
+  (setv input-list (EditableList)
+        list-actions {"Load CSV" (fn [x] (x.populate (load-csv)))
+                      "Clear list" (fn [x] (x.clear))}
+        output-tree (EditableTree)
+        tree-actions {"Save to JSON" (fn [x] (store x.items))
+                      "Add Entry" (fn [x] (x.add-entry))}
+        content (h-layout [input-list output-tree] :spacing 10 :margin 10))
+
+  ; The actions must be bound separately due to Qt internals
+  (bind-actions input-list list-actions)
+  (bind-actions output-tree tree-actions)
+
+  (MainWindowTemplate :domain "com.github.dmitrykouznetsov"
+                      :appname "csv2json"
                       :centralwidget content))
 
 
